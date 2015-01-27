@@ -26,7 +26,7 @@ public class Query {
 	StringTokenizer tok = new StringTokenizer( queryString );
 	while ( tok.hasMoreTokens() ) {
 	    terms.add( tok.nextToken() );
-	    weights.add( new Double(1) );
+	    weights.add( 1d );
 	}    
     }
     

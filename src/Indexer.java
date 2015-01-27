@@ -15,8 +15,9 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.LinkedList;
-import org.apache.pdfbox.cos.COSDocument;
+
 import org.apache.pdfbox.pdfparser.*;
+import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
@@ -73,8 +74,11 @@ public class Indexer {
 		// an IO error could occur
 		if ( fs != null ) {
 		    for ( int i=0; i<fs.length; i++ ) {
-			processFiles( new File( f, fs[i] ));
-		    }
+				processFiles(new File(f, fs[i]));
+				if (i % 1000 == 0) {
+					System.out.println((i * 100) / fs.length + "%");
+				}
+			}
 		}
 	    } else {
 		//System.err.println( "Indexing " + f.getPath() );
@@ -127,7 +131,7 @@ public class Indexer {
      */
     public String extractPDFContents( File f ) throws IOException {
 	FileInputStream fi = new FileInputStream( f );
-	PDFParser parser = new PDFParser( fi );   
+	PDFParser parser = new PDFParser( fi );
 	parser.parse();   
 	fi.close();
 	COSDocument cd = parser.getDocument();   

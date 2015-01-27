@@ -24,9 +24,23 @@ public class HashedIndex implements Index {
      *  Inserts this token in the index.
      */
     public void insert( String token, int docID, int offset ) {
-	//
-	//  YOUR CODE HERE
-	//
+        PostingsList postingsList = index.get(token);
+        if (postingsList == null){
+            postingsList = new PostingsList();
+            index.put(token, postingsList);
+        }
+	    PostingsEntry postingsEntry = null;
+
+        if (postingsList.size() < 0 && postingsList.get(postingsList.size()-1).getDocID() == docID){
+            postingsEntry = postingsList.get(postingsList.size()-1);
+        }
+
+        if (postingsEntry != null){
+            postingsEntry.addOccurance(offset);
+        }
+        else{
+            postingsList.add(new PostingsEntry(docID, offset));
+        }
     }
 
 
@@ -34,10 +48,7 @@ public class HashedIndex implements Index {
      *  Returns all the words in the index.
      */
     public Iterator<String> getDictionary() {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+	return index.keySet().iterator();
     }
 
 
@@ -46,10 +57,7 @@ public class HashedIndex implements Index {
      *  if the term is not in the index.
      */
     public PostingsList getPostings( String token ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+	return index.get(token);
     }
 
 
@@ -57,9 +65,9 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
+	if (query.size() == 1){
+        return getPostings(query.terms.getFirst());
+    }
 	return null;
     }
 

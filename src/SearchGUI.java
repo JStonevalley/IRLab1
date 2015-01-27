@@ -51,7 +51,7 @@ public class SearchGUI extends JFrame {
     Object indexLock = new Object();
 
     /**  Directory from which the code is compiled and run. */
-    public static final String homeDir = "/info/DD2476/ir15/lab";
+    public static final String homeDir = "C:\\Users\\Jonas\\SkyDrive\\KTH\\Search Engines\\";
 
 
     /*
@@ -341,7 +341,7 @@ public class SearchGUI extends JFrame {
 	synchronized ( indexLock ) {
 	    resultWindow.setText( "\n  Indexing, please wait..." );
 	    for ( int i=0; i<dirNames.size(); i++ ) {
-		File dokDir = new File( dirNames.get( i ));
+		File dokDir = new File( homeDir + dirNames.get( i ));
 		indexer.processFiles( dokDir );
 	    }
 	    resultWindow.setText( "\n  Done!" );
@@ -376,10 +376,10 @@ public class SearchGUI extends JFrame {
 
 
     public static void main( String[] args ) {
-	SearchGUI s = new SearchGUI();
-	s.createGUI();
-	s.decodeArgs( args );
-	s.index();
+		SearchGUI s = new SearchGUI();
+		s.createGUI();
+		s.decodeArgs( args );
+		s.index();
     }
 
 }

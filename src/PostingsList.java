@@ -28,9 +28,9 @@ public class PostingsList implements Serializable {
 	return list.get( i );
     }
 
-    //
-    //  YOUR CODE HERE
-    //
+    public void add(PostingsEntry postingsEntry){
+        list.add(postingsEntry);
+    }
 }
 	
 
