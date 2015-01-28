@@ -51,15 +51,15 @@ public class SearchGUI extends JFrame {
     Object indexLock = new Object();
 
     /**  Directory from which the code is compiled and run. */
-    public static final String homeDir = "C:\\Users\\Jonas\\SkyDrive\\KTH\\Search Engines\\";
+    public static final String homeDir = "C:\\Users\\Jonas\\Desktop\\Lab1\\";
 
 
     /*
      *   The nice logotype
      *   Generated at http://neswork.com/logo-generator/google-font
      */
-    static final String LOGOPIC = homeDir + "/pics/IRfifteen.jpg";
-    static final String BLANKPIC = homeDir + "/pics/blank.jpg";
+    static final String LOGOPIC = homeDir + "pics/IRfifteen.jpg";
+    static final String BLANKPIC = homeDir + "pics/blank.jpg";
 	
 
     /*  
@@ -376,10 +376,10 @@ public class SearchGUI extends JFrame {
 
 
     public static void main( String[] args ) {
-		SearchGUI s = new SearchGUI();
-		s.createGUI();
-		s.decodeArgs( args );
-		s.index();
+	SearchGUI s = new SearchGUI();
+	s.createGUI();
+	s.decodeArgs( args );
+	s.index();
     }
 
 }

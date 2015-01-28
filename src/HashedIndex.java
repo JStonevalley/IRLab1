@@ -17,8 +17,11 @@ import java.util.Iterator;
 public class HashedIndex implements Index {
 
     /** The index as a hashtable. */
-    private HashMap<String,PostingsList> index = new HashMap<String,PostingsList>();
+    private HashMap<String,PostingsList> index;
 
+    public HashedIndex() {
+        this.index = new HashMap<String,PostingsList>();
+    }
 
     /**
      *  Inserts this token in the index.
@@ -28,18 +31,13 @@ public class HashedIndex implements Index {
         if (postingsList == null){
             postingsList = new PostingsList();
             index.put(token, postingsList);
-        }
-	    PostingsEntry postingsEntry = null;
-
-        if (postingsList.size() < 0 && postingsList.get(postingsList.size()-1).getDocID() == docID){
-            postingsEntry = postingsList.get(postingsList.size()-1);
-        }
-
-        if (postingsEntry != null){
-            postingsEntry.addOccurance(offset);
+            postingsList.addLast(new PostingsEntry(docID));
         }
         else{
-            postingsList.add(new PostingsEntry(docID, offset));
+            PostingsEntry postingsEntry = postingsList.getLast();
+            if (postingsEntry.docID != docID){
+                postingsList.addLast(new PostingsEntry(docID));
+            }
         }
     }
 
@@ -65,9 +63,9 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
-	if (query.size() == 1){
-        return getPostings(query.terms.getFirst());
-    }
+	// 
+	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
+	//
 	return null;
     }
 

@@ -6,8 +6,8 @@
  *   Second version: Johan Boye, 2012
  */
 
-import java.util.LinkedList;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  *   A list of postings for a given word.
@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class PostingsList implements Serializable {
     
     /** The postings list as a linked list. */
-    private LinkedList<PostingsEntry> list = new LinkedList<PostingsEntry>();
+    private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
 
 
     /**  Number of postings in this list  */
@@ -28,7 +28,15 @@ public class PostingsList implements Serializable {
 	return list.get( i );
     }
 
-    public void add(PostingsEntry postingsEntry){
+    public PostingsEntry getFirst(){
+        return get(0);
+    }
+
+    public PostingsEntry getLast(){
+        return get(size() - 1);
+    }
+
+    public void addLast(PostingsEntry postingsEntry){
         list.add(postingsEntry);
     }
 }
