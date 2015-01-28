@@ -10,12 +10,24 @@ import java.io.Serializable;
 
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
-    public int docID;
-    public double score;
+    private int docID;
+    private double score;
 
     public PostingsEntry(int docID) {
         this.docID = docID;
         this.score = 1d;
+    }
+
+    public int getDocID() {
+        return docID;
+    }
+
+    public double getScore() {
+        return score;
+    }
+
+    public void addOccurance(){
+        score++;
     }
 
     /**

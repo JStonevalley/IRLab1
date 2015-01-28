@@ -178,15 +178,15 @@ public class SearchGUI extends JFrame {
 			buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
 			for ( int i=0; i<results.size(); i++ ) {
 			    buf.append( " " + i + ". " );
-			    String filename = indexer.index.docIDs.get( "" + results.get(i).docID );
+			    String filename = indexer.index.docIDs.get( "" + results.get(i).getDocID() );
 			    if ( filename == null ) {
-				buf.append( "" + results.get(i).docID );
+				buf.append( "" + results.get(i).getDocID() );
 			    }
 			    else {
 				buf.append( filename );
 			    }
 			    if ( queryType == Index.RANKED_QUERY ) {
-				buf.append( "   " + String.format( "%.5f", results.get(i).score )); 
+				buf.append( "   " + String.format( "%.5f", results.get(i).getScore() ));
 			    }
 			    buf.append( "\n" );
 			}
@@ -226,14 +226,14 @@ public class SearchGUI extends JFrame {
 			buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
 			for ( int i=0; i<results.size(); i++ ) {
 			    buf.append( " " + i + ". " );
-			    String filename = indexer.index.docIDs.get( "" + results.get(i).docID );
+			    String filename = indexer.index.docIDs.get( "" + results.get(i).getDocID() );
 			    if ( filename == null ) {
-				buf.append( "" + results.get(i).docID );
+				buf.append( "" + results.get(i).getDocID() );
 			    }
 			    else {
 				buf.append( filename );
 			    }
-			    buf.append( "   " + String.format( "%.5f", results.get(i).score ) + "\n" );
+			    buf.append( "   " + String.format( "%.5f", results.get(i).getScore() ) + "\n" );
 			}
 		    }
 		    else {
@@ -342,7 +342,7 @@ public class SearchGUI extends JFrame {
 	    resultWindow.setText( "\n  Indexing, please wait..." );
 	    for ( int i=0; i<dirNames.size(); i++ ) {
 		File dokDir = new File( homeDir + dirNames.get( i ));
-		indexer.processFiles( dokDir );
+		indexer.processFiles( dokDir, resultWindow);
 	    }
 	    resultWindow.setText( "\n  Done!" );
 	}

@@ -35,8 +35,11 @@ public class HashedIndex implements Index {
         }
         else{
             PostingsEntry postingsEntry = postingsList.getLast();
-            if (postingsEntry.docID != docID){
+            if (postingsEntry.getDocID() != docID){
                 postingsList.addLast(new PostingsEntry(docID));
+            }
+            else{
+                postingsEntry.addOccurance();
             }
         }
     }
@@ -46,7 +49,7 @@ public class HashedIndex implements Index {
      *  Returns all the words in the index.
      */
     public Iterator<String> getDictionary() {
-	return index.keySet().iterator();
+        return index.keySet().iterator();
     }
 
 
@@ -55,7 +58,7 @@ public class HashedIndex implements Index {
      *  if the term is not in the index.
      */
     public PostingsList getPostings( String token ) {
-	return index.get(token);
+        return index.get(token);
     }
 
 
@@ -63,10 +66,10 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
-	// 
-	//  REPLACE THE STATEMENT BELOW WITH YOUR CODE
-	//
-	return null;
+        if (query.getTermsSize() == 1){
+            return getPostings(query.getTerm(0));
+        }
+        return null;
     }
 
 

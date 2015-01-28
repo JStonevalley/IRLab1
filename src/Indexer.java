@@ -20,6 +20,7 @@ import org.apache.pdfbox.pdfparser.*;
 import org.apache.pdfbox.util.PDFTextStripper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 
+import javax.swing.*;
 
 /**
  *   Processes a directory structure and indexes all PDF and text files.
@@ -65,7 +66,7 @@ public class Indexer {
 	 *  Tokenizes and indexes the file @code{f}. If @code{f} is a directory,
 	 *  all its files and subdirectories are recursively processed.
 	 */
-	public void processFiles( File f ) {
+	public void processFiles( File f , JTextArea resultWindow) {
 		// do not try to index fs that cannot be read
 		if ( f.canRead() ) {
 			if ( f.isDirectory() ) {
@@ -73,9 +74,9 @@ public class Indexer {
 				// an IO error could occur
 				if ( fs != null ) {
 					for ( int i=0; i<fs.length; i++ ) {
-						processFiles( new File( f, fs[i] ));
+						processFiles( new File( f, fs[i] ), resultWindow);
 						if (i % 200 == 0) {
-							System.out.println((i * 100) / fs.length + "%");
+							resultWindow.setText( "\n  Indexing, please wait... " + (i * 100) / fs.length + "%" );
 						}
 					}
 				}

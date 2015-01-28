@@ -10,15 +10,31 @@ import java.util.StringTokenizer;
 
 public class Query {
     
-    public LinkedList<String> terms = new LinkedList<String>();
-    public LinkedList<Double> weights = new LinkedList<Double>();
+    private LinkedList<String> terms = new LinkedList<String>();
+    private LinkedList<Double> weights = new LinkedList<Double>();
 
     /**
      *  Creates a new empty Query 
      */
     public Query() {
     }
-	
+
+    public int getTermsSize(){
+        return terms.size();
+    }
+
+    public int getWeightsSize(){
+        return weights.size();
+    }
+
+    public String getTerm(int i){
+        return terms.get(i);
+    }
+
+    public Double getWeight(int i){
+        return  weights.get(i);
+    }
+
     /**
      *  Creates a new Query from a string of words
      */
