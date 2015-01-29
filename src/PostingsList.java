@@ -12,7 +12,7 @@ import java.util.ArrayList;
 /**
  *   A list of postings for a given word.
  */
-public class PostingsList implements Serializable {
+public class PostingsList implements Serializable, Comparable<PostingsList> {
     
     /** The postings list as a linked list. */
     private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
@@ -39,6 +39,16 @@ public class PostingsList implements Serializable {
     public void addLast(PostingsEntry postingsEntry){
         list.add(postingsEntry);
     }
+
+	@Override public int compareTo(PostingsList other) {
+		if (other.size() < size()){
+			return 1;
+		}
+		else if (other.size() > size()){
+			return -1;
+		}
+		return 0;
+	}
 }
 	
 

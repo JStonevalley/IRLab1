@@ -7,10 +7,7 @@
  *   Additions: Hedvig Kjellström, 2012-14
  */
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  *   Implements an inverted index as a Hashtable from words to PostingsLists.
@@ -71,53 +68,37 @@ public class HashedIndex implements Index {
             return getPostings(query.getTerm(0));
         }
         else if (query.getTermsSize() > 1 && queryType == Index.INTERSECTION_QUERY){
-            ArrayList<PostingsList> postingLists = new ArrayList<PostingsList>();
-            PostingsList intermediatePosting = new PostingsList();
-            for (int i = 0; i < query.getTermsSize(); i++) {
-				if (getPostings(query.getTerm(i)) == null){
-					return null;
-				}
-                postingLists.add(getPostings(query.getTerm(i)));
-            }
-            int intermediateIndex = 0;
-            for (int i = 0; i < postingLists.size(); i++) {
-                if (postingLists.get(i).size() > intermediatePosting.size()){
-                    intermediateIndex = i;
-                    intermediatePosting = postingLists.get(i);
-                }
-            }
-            postingLists.remove(intermediateIndex);
+			ArrayList<PostingsList> postingLists = collectPostings(query);
+			Collections.sort(postingLists);
+            PostingsList intermediatePosting = postingLists.remove(postingLists.size() - 1);
             while (!postingLists.isEmpty()) {
-                PostingsList shortestPosting = new PostingsList();
-                int shortestIndex = 0;
-                for (int i = 0; i < postingLists.size(); i++) {
-                    if (postingLists.get(i).size() > shortestPosting.size()){
-                        shortestIndex = i;
-                        shortestPosting = postingLists.get(i);
-                    }
-                }
-                postingLists.remove(shortestIndex);
+                PostingsList shortestPosting = postingLists.remove(postingLists.size() - 1);
                 intermediatePosting = intersect(intermediatePosting, shortestPosting);
             }
             return intermediatePosting;
         }
         else if (query.getTermsSize() > 1 && queryType == Index.PHRASE_QUERY){
-            ArrayList<PostingsList> postingLists = new ArrayList<PostingsList>();
+			ArrayList<PostingsList> postingLists = collectPostings(query);
             PostingsList intermediatePosting;
-            for (int i = 0; i < query.getTermsSize(); i++) {
-				if (getPostings(query.getTerm(i)) == null){
-					return null;
-				}
-                postingLists.add(getPostings(query.getTerm(i)));
-            }
             intermediatePosting = postingLists.get(0);
             for (int i = 1; i < postingLists.size(); i++) {
-                intermediatePosting = positionalIntersect(intermediatePosting, postingLists.get(i), 1);
+                intermediatePosting = phraseIntersect(intermediatePosting, postingLists.get(i));
             }
             return intermediatePosting;
         }
         return null;
     }
+
+	private ArrayList<PostingsList> collectPostings(Query query){
+		ArrayList<PostingsList> postingLists = new ArrayList<PostingsList>();
+		for (int i = 0; i < query.getTermsSize(); i++) {
+			if (getPostings(query.getTerm(i)) == null){
+				return null;
+			}
+			postingLists.add(getPostings(query.getTerm(i)));
+		}
+		return postingLists;
+	}
 
     private PostingsList intersect(PostingsList p1, PostingsList p2){
         PostingsList answer = new PostingsList();
@@ -138,14 +119,14 @@ public class HashedIndex implements Index {
         return answer;
     }
 
-    private PostingsList positionalIntersect(PostingsList p1, PostingsList p2, int k){
+    private PostingsList phraseIntersect(PostingsList p1, PostingsList p2){
         PostingsList answer = new PostingsList();
         int i = 0, j = 0;
         while (i < p1.size() && j < p2.size()){
             if(p1.get(i).getDocID() == p2.get(j).getDocID()){
                 Iterator<Integer> iterator = p1.get(i).getIterator();
                 while (iterator.hasNext()){
-                    if (p2.get(j).hasOffset(iterator.next() + k)){
+                    if (p2.get(j).hasOffset(iterator.next() + 1)){
                         answer.addLast(p2.get(j));
 						break;
                     }
