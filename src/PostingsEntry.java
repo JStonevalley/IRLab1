@@ -7,15 +7,21 @@
  */
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 
 public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
     
     private int docID;
+    private HashSet<Integer> offsets;
     private double score;
 
-    public PostingsEntry(int docID) {
+    public PostingsEntry(int docID, int offset) {
         this.docID = docID;
         this.score = 1d;
+        this.offsets = new HashSet<Integer>();
+        this.offsets.add(offset);
     }
 
     public int getDocID() {
@@ -26,8 +32,16 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         return score;
     }
 
-    public void addOccurance(){
-        score++;
+    public void addOccurance(int offset){
+        offsets.add(offset);
+    }
+
+    public boolean hasOffset(int offset){
+        return offsets.contains(offset);
+    }
+
+    public Iterator<Integer> getIterator(){
+        return offsets.iterator();
     }
 
     /**
