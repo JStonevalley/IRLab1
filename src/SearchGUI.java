@@ -53,7 +53,7 @@ public class SearchGUI extends JFrame {
 	Object indexLock = new Object();
 
 	/**  Directory from which the code is compiled and run. */
-	public static final String homeDir = "C:\\Users\\Jonas\\Desktop\\Lab1\\";
+	public static final String homeDir = "C:\\Users\\Jonas\\SkyDrive\\KTH\\Information Retrieval\\Lab1\\data\\";
 
 
 	/*
@@ -346,7 +346,7 @@ public class SearchGUI extends JFrame {
 				File dokDir = new File( homeDir + dirNames.get( i ));
 				indexer.processFiles( dokDir, resultWindow);
 			}
-			resultWindow.setText( "\n  Done!" );
+			resultWindow.setText( "Indexing Complete..." );
 		}
 	};
 
@@ -373,15 +373,26 @@ public class SearchGUI extends JFrame {
 		}
 	}
 
+	private void switchToFileHash(){
+		indexer.switchToFileHash(resultWindow);
+	}
+
 
     /* ----------------------------------------------- */
 
 
 	public static void main( String[] args ) {
+//		PostingsList postingsList = new PostingsList();
+//		postingsList.addLast(new PostingsEntry(1,1));
+//		postingsList.addLast(new PostingsEntry(2,2));
+//		FileHashMap<String, PostingsList> fileHashMap = new FileHashMap<String, PostingsList>(homeDir + "postings\\");
+//		fileHashMap.put("hej", postingsList);
+
 		SearchGUI s = new SearchGUI();
 		s.createGUI();
 		s.decodeArgs( args );
 		s.index();
+		s.switchToFileHash();
 	}
 
 }

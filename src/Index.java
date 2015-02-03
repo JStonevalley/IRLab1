@@ -7,6 +7,7 @@
  *   Additions: Hedvig Kjellström, 2012-14
  */
 
+import javax.swing.*;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -37,6 +38,7 @@ public interface Index {
     public Iterator<String> getDictionary();
     public PostingsList getPostings( String token );
     public PostingsList search( Query query, int queryType, int rankingType, int structureType );
+	public void switchToFileHash(JTextArea resultWindow);
     public void cleanup();
 
 }

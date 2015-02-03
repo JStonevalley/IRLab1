@@ -75,7 +75,7 @@ public class Indexer {
 				if ( fs != null ) {
 					for ( int i=0; i<fs.length; i++ ) {
 						processFiles( new File( f, fs[i] ), resultWindow);
-						if (i % 200 == 0) {
+						if (i % (fs.length/100) == 0) {
 							resultWindow.setText( "\n  Indexing, please wait... " + (i * 100) / fs.length + "%" );
 						}
 					}
@@ -150,6 +150,10 @@ public class Indexer {
 	 */
 	public void insertIntoIndex( int docID, String token, int offset ) {
 		index.insert( token, docID, offset );
+	}
+
+	public void switchToFileHash(JTextArea resultWindow){
+		index.switchToFileHash(resultWindow);
 	}
 }
 	
