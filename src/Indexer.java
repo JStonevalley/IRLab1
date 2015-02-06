@@ -15,6 +15,9 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Observable;
+import java.util.Observer;
+
 import org.apache.pdfbox.cos.COSDocument;
 import org.apache.pdfbox.pdfparser.*;
 import org.apache.pdfbox.util.PDFTextStripper;
@@ -25,10 +28,12 @@ import javax.swing.*;
 /**
  *   Processes a directory structure and indexes all PDF and text files.
  */
-public class Indexer {
+public class Indexer implements Observer {
 
 	/** The index to be built up by this indexer. */
 	public Index index;
+	private JTextArea resultWindow;
+	private String indexingProgress;
 
 	/** The next docID to be generated. */
 	private int lastDocID = 0;
@@ -54,8 +59,8 @@ public class Indexer {
 	/**
 	 *  Initializes the index as a HashedIndex.
 	 */
-	public Indexer() {
-		index = new HashedIndex();
+	public Indexer(JTextArea resultWindow) {
+		this.resultWindow = resultWindow;
 	}
 
 
@@ -66,17 +71,20 @@ public class Indexer {
 	 *  Tokenizes and indexes the file @code{f}. If @code{f} is a directory,
 	 *  all its files and subdirectories are recursively processed.
 	 */
-	public void processFiles( File f , JTextArea resultWindow) {
+	public void processFiles( File f) {
 		// do not try to index fs that cannot be read
 		if ( f.canRead() ) {
 			if ( f.isDirectory() ) {
 				String[] fs = f.list();
 				// an IO error could occur
 				if ( fs != null ) {
+					index = new FileIndex(fs.length, this);
+					//index = new HashedIndex();
 					for ( int i=0; i<fs.length; i++ ) {
-						processFiles( new File( f, fs[i] ), resultWindow);
+						processFiles( new File( f, fs[i] ));
 						if (i % (fs.length/100) == 0) {
-							resultWindow.setText( "\n  Indexing, please wait... " + (i * 100) / fs.length + "%" );
+							indexingProgress = "\n    Indexing, please wait... " + (i * 100) / fs.length + "%";
+							resultWindow.setText(indexingProgress);
 						}
 					}
 				}
@@ -152,8 +160,8 @@ public class Indexer {
 		index.insert( token, docID, offset );
 	}
 
-	public void switchToFileHash(JTextArea resultWindow){
-		index.switchToFileHash(resultWindow);
+	@Override public void update(Observable o, Object arg) {
+		resultWindow.setText(indexingProgress + "\n    Writing to file... " + arg + "%");
 	}
 }
 	

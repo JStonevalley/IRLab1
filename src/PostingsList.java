@@ -28,7 +28,11 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 	return list.get( i );
     }
 
-    public PostingsEntry getFirst(){
+	public ArrayList<PostingsEntry> getList() {
+		return list;
+	}
+
+	public PostingsEntry getFirst(){
         return get(0);
     }
 
@@ -39,6 +43,10 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
     public void addLast(PostingsEntry postingsEntry){
         list.add(postingsEntry);
     }
+
+	public void appendPostingsList(PostingsList postingsList){
+		getList().addAll(postingsList.getList());
+	}
 
 	@Override public int compareTo(PostingsList other) {
 		if (other.size() < size()){

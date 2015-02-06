@@ -25,9 +25,6 @@ import javax.swing.event.*;
  */
 public class SearchGUI extends JFrame {
 
-	/**  The indexer creating the search index. */
-	Indexer indexer = new Indexer();
-
 	/**  The query posed by the user, used in search() and relevanceFeedbackSearch() */
 	private Query query;
 
@@ -94,6 +91,9 @@ public class SearchGUI extends JFrame {
 	public JPanel feedbackBar = new JPanel();
 	JCheckBox[] feedbackButton = new JCheckBox[10];
 	JToggleButton feedbackExecutor = new JToggleButton("New search");
+
+	/**  The indexer creating the search index. */
+	Indexer indexer = new Indexer(resultWindow);
 
 
     /* ----------------------------------------------- */
@@ -344,7 +344,7 @@ public class SearchGUI extends JFrame {
 			resultWindow.setText( "\n  Indexing, please wait..." );
 			for ( int i=0; i<dirNames.size(); i++ ) {
 				File dokDir = new File( homeDir + dirNames.get( i ));
-				indexer.processFiles( dokDir, resultWindow);
+				indexer.processFiles(dokDir);
 			}
 			resultWindow.setText( "Indexing Complete..." );
 		}
@@ -373,10 +373,6 @@ public class SearchGUI extends JFrame {
 		}
 	}
 
-	private void switchToFileHash(){
-		indexer.switchToFileHash(resultWindow);
-	}
-
 
     /* ----------------------------------------------- */
 
@@ -392,7 +388,7 @@ public class SearchGUI extends JFrame {
 		s.createGUI();
 		s.decodeArgs( args );
 		s.index();
-		s.switchToFileHash();
+		//s.switchToFileHash();
 	}
 
 }
