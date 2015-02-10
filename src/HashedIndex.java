@@ -7,7 +7,6 @@
  *   Additions: Hedvig Kjellström, 2012-14
  */
 
-import javax.swing.*;
 import java.util.*;
 
 /**
@@ -20,7 +19,6 @@ public class HashedIndex implements Index {
 
     public HashedIndex() {
         this.index = new HashMap<String,PostingsList>();
-		//this.index = new FileHashMap<String, PostingsList>(SearchGUI.homeDir + "postings\\");
     }
 
     /**
@@ -91,23 +89,9 @@ public class HashedIndex implements Index {
         return null;
     }
 
-//	@Override public void switchToFileHash(JTextArea resultWindow) {
-//		FileHashMap<String, PostingsList> newIndex = new FileHashMap<String, PostingsList>("C:\\Users\\Jonas\\Documents\\IRLab1\\postings\\");
-//		int total = index.size();
-//		int part = 0;
-//		String[] keys = new String[index.size()];
-//		index.keySet().toArray(keys);
-//		for (String key : keys){
-//			newIndex.put(key, index.remove(key));
-//			part++;
-//			if (part % (total / 100) == 0) {
-//				resultWindow.setText("\n Writing index to file... " + (part * 100) / total + "%");
-//			}
-//		}
-//		index.clear();
-//		index = newIndex;
-//		resultWindow.setText("\n  Done!");
-//	}
+	@Override public boolean hasSavedIndex() {
+		return false;
+	}
 
 	private ArrayList<PostingsList> collectPostings(Query query){
 		ArrayList<PostingsList> postingLists = new ArrayList<PostingsList>();

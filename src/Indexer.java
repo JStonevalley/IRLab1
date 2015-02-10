@@ -80,10 +80,14 @@ public class Indexer implements Observer {
 				if ( fs != null ) {
 					index = new FileIndex(fs.length, this);
 					//index = new HashedIndex();
+					String progress = "\n    Indexing, please wait... ";
+					if (index.hasSavedIndex()){
+						progress = "\n    Reading dictionary from file... ";
+					}
 					for ( int i=0; i<fs.length; i++ ) {
 						processFiles( new File( f, fs[i] ));
 						if (i % (fs.length/100) == 0) {
-							indexingProgress = "\n    Indexing, please wait... " + (i * 100) / fs.length + "%";
+							indexingProgress = progress + (i * 100) / fs.length + "%";
 							resultWindow.setText(indexingProgress);
 						}
 					}

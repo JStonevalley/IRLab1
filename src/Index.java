@@ -38,6 +38,7 @@ public interface Index {
     public Iterator<String> getDictionary();
     public PostingsList getPostings( String token );
     public PostingsList search( Query query, int queryType, int rankingType, int structureType );
+	public boolean hasSavedIndex();
     public void cleanup();
 
 }

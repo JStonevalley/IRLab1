@@ -6,6 +6,10 @@ import javax.swing.*;
 import java.io.*;
 import java.util.*;
 import java.util.Observable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Jonas on 03/02/2015.
@@ -48,15 +52,30 @@ public class FileIndex extends Observable implements Index {
 			}
 		}
 		dictionary = new HashSet<String>();
-		Collection<File> files = FileUtils.listFiles(new File(directory), FileFilterUtils.trueFileFilter(), null);
-		for (File term : files){
-			dictionary.add(term.getName().substring(0, term.getName().length()-4));
+		if (configuration.isSavedIndex()){
+			file = new File("C:\\Users\\Jonas\\Documents\\IRLab1\\dictionary.txt");
+			try {
+				FileInputStream fileInputStream = new FileInputStream(file);
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(fileInputStream);
+				ObjectInputStream objectInputStream = new ObjectInputStream(bufferedInputStream);
+				dictionary = (HashSet<String>)objectInputStream.readObject();
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
 		}
 		search = new Search();
 		writtenFiles = 0;
 		tempDictionary = new HashMap<String, PostingsList>();;
 		this.numFiles = numFiles;
 		addObserver(observer);
+	}
+
+	@Override public boolean hasSavedIndex(){
+		return configuration.isSavedIndex();
 	}
 
 	@Override public void insert(String token, int docID, int offset) {
@@ -67,32 +86,19 @@ public class FileIndex extends Observable implements Index {
 		if (docID == numFiles - 2){
 			span = 0;
 		}
+		// Write to file
 		if (docID > writtenFiles + span){
 			int counter = 0;
 			int total = tempDictionary.size();
 			Iterator<String> iterator = tempDictionary.keySet().iterator();
 			String key;
 			PostingsList postingsList ;
-			while (iterator.hasNext()){
+			ExecutorService pool = Executors.newFixedThreadPool(8);
+			while (iterator.hasNext()) {
 				key = iterator.next();
-				postingsList = tempDictionary.get(key);
-				File file = new File(directory + key + ".txt");
-				try {
-					ObjectOutputStream objectStream;
-					if (file.exists()){
-						FileOutputStream fileOutputStream = new FileOutputStream(file, true);
-						BufferedOutputStream outputBuffer = new BufferedOutputStream(fileOutputStream);
-						objectStream = new AppendableObjectOutputStream(outputBuffer);
-					}
-					else {
-						FileOutputStream fileOutputStream = new FileOutputStream(file, true);
-						BufferedOutputStream outputBuffer = new BufferedOutputStream(fileOutputStream);
-						objectStream = new ObjectOutputStream(outputBuffer);
-					}
-					objectStream.writeObject(postingsList);
-					objectStream.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+				if (isValidName(key)){
+					postingsList = tempDictionary.get(key);
+					pool.execute(new FileWriter(postingsList, directory + key + ".txt"));
 				}
 				counter++;
 				setChanged();
@@ -101,6 +107,7 @@ public class FileIndex extends Observable implements Index {
 			tempDictionary = new HashMap<String, PostingsList>();
 			writtenFiles = docID;
 		}
+		// Index term
 		PostingsList postingsList = tempDictionary.get(token);
 		if (postingsList == null){
 			postingsList = new PostingsList();
@@ -195,11 +202,40 @@ public class FileIndex extends Observable implements Index {
 			ObjectOutputStream objectStream = new ObjectOutputStream(outputBuffer);
 			objectStream.writeObject(configuration);
 			objectStream.close();
+			file = new File("C:\\Users\\Jonas\\Documents\\IRLab1\\dictionary.txt");
+			fileOutputStream = new java.io.FileOutputStream(file, false);
+			outputBuffer = new BufferedOutputStream(fileOutputStream);
+			objectStream = new ObjectOutputStream(outputBuffer);
+			objectStream.writeObject(dictionary);
+			objectStream.close();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
 
+	private boolean isValidName(String text){
+		if (text.length() > 200){
+			return false;
+		}
+		Pattern pattern = Pattern.compile(
+				"# Match a valid Windows filename (unspecified file system).          \n" +
+						"^                                # Anchor to start of string.        \n" +
+						"(?!                              # Assert filename is not: CON, PRN, \n" +
+						"  (?:                            # AUX, NUL, COM1, COM2, COM3, COM4, \n" +
+						"    CON|PRN|AUX|NUL|             # COM5, COM6, COM7, COM8, COM9,     \n" +
+						"    COM[1-9]|LPT[1-9]            # LPT1, LPT2, LPT3, LPT4, LPT5,     \n" +
+						"  )                              # LPT6, LPT7, LPT8, and LPT9...     \n" +
+						"  (?:\\.[^.]*)?                  # followed by optional extension    \n" +
+						"  $                              # and end of string                 \n" +
+						")                                # End negative lookahead assertion. \n" +
+						"[^<>:\"/\\\\|?*\\x00-\\x1F]*     # Zero or more valid filename chars.\n" +
+						"[^<>:\"/\\\\|?*\\x00-\\x1F\\ .]  # Last char is not a space or dot.  \n" +
+						"$                                # Anchor to end of string.            ",
+				Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.COMMENTS);
+		Matcher matcher = pattern.matcher(text);
+		boolean isMatch = matcher.matches();
+		return isMatch;
 	}
 }
