@@ -30,10 +30,17 @@ public class Search {
 		while (i < p1.size() && j < p2.size()){
 			if(p1.get(i).getDocID() == p2.get(j).getDocID()){
 				Iterator<Integer> iterator = p1.get(i).getIterator();
+				boolean entryCreated = false;
 				while (iterator.hasNext()){
-					if (p2.get(j).hasOffset(iterator.next() + 1)){
-						answer.addLast(p2.get(j));
-						break;
+					int offset = iterator.next() + 1;
+					if (p2.get(j).hasOffset(offset)){
+						if (!entryCreated) {
+							answer.addLast(new PostingsEntry(p2.get(j).getDocID(), offset));
+							entryCreated = true;
+						}
+						else{
+							answer.get(answer.size()-1).addOccurance(offset);
+						}
 					}
 				}
 				i++;

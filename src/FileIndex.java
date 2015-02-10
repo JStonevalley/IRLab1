@@ -93,7 +93,7 @@ public class FileIndex extends Observable implements Index {
 			Iterator<String> iterator = tempDictionary.keySet().iterator();
 			String key;
 			PostingsList postingsList ;
-			ExecutorService pool = Executors.newFixedThreadPool(8);
+			ExecutorService pool = Executors.newFixedThreadPool(16);
 			while (iterator.hasNext()) {
 				key = iterator.next();
 				if (isValidName(key)){
