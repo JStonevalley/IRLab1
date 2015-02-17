@@ -126,6 +126,8 @@ public class FileIndex extends Observable implements Index {
 		dictionary.add(token);
 	}
 
+	public void computeScore(){}
+
 	@Override public Iterator<String> getDictionary() {
 		return dictionary.iterator();
 	}

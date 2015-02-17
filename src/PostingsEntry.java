@@ -7,7 +7,6 @@
  */
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -44,7 +43,19 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         return offsets.iterator();
     }
 
-    /**
+	public int getCount() {
+		return offsets.size();
+	}
+
+	public void normalizeScore(double norm){
+		score = score/norm;
+	}
+
+	public void computeScore(double iDF){
+		score = getCount() * iDF;
+	}
+
+	/**
      *  PostingsEntries are compared by their score (only relevant 
      *  in ranked retrieval).
      *
@@ -52,13 +63,8 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
      *  descending order.
      */
     public int compareTo( PostingsEntry other ) {
-	return Double.compare( other.score, score );
+	return Double.compare(other.score, score );
     }
-
-    //
-    //  YOUR CODE HERE
-    //
-
 }
 
     

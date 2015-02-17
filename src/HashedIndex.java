@@ -18,7 +18,7 @@ public class HashedIndex implements Index {
     private HashMap<String,PostingsList> index;
 
     public HashedIndex() {
-        this.index = new HashMap<String,PostingsList>();
+        this.index = new HashMap<String,PostingsList>(160000);
     }
 
     /**
@@ -42,6 +42,17 @@ public class HashedIndex implements Index {
 		index.put(token, postingsList);
     }
 
+	public void computeScore(){
+		Iterator<String> dictionary = getDictionary();
+		PostingsList term;
+		while(dictionary.hasNext()){
+			term = index.get(dictionary.next());
+			//term.computeCF();
+			term.computeIDF(docLengths.size());
+		}
+
+	}
+
 
     /**
      *  Returns all the words in the index.
@@ -64,8 +75,14 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
+		Search search = new Search();
         if (query.getTermsSize() == 1){
-            return getPostings(query.getTerm(0));
+			PostingsList list = getPostings(query.getTerm(0));
+			list.computeScores();
+			//list.computeNorm();
+			list.normalizeScores(docLengths);
+			list.sortList();
+            return list;
         }
         else if (query.getTermsSize() > 1 && queryType == Index.INTERSECTION_QUERY){
 			ArrayList<PostingsList> postingLists = collectPostings(query);
@@ -73,7 +90,7 @@ public class HashedIndex implements Index {
             PostingsList intermediatePosting = postingLists.remove(postingLists.size() - 1);
             while (!postingLists.isEmpty()) {
                 PostingsList shortestPosting = postingLists.remove(postingLists.size() - 1);
-                intermediatePosting = intersect(intermediatePosting, shortestPosting);
+                intermediatePosting = search.intersect(intermediatePosting, shortestPosting);
             }
             return intermediatePosting;
         }
@@ -82,7 +99,7 @@ public class HashedIndex implements Index {
             PostingsList intermediatePosting;
             intermediatePosting = postingLists.get(0);
             for (int i = 1; i < postingLists.size(); i++) {
-                intermediatePosting = phraseIntersect(intermediatePosting, postingLists.get(i));
+                intermediatePosting = search.phraseIntersect(intermediatePosting, postingLists.get(i));
             }
             return intermediatePosting;
         }
@@ -104,49 +121,6 @@ public class HashedIndex implements Index {
 		return postingLists;
 	}
 
-    private PostingsList intersect(PostingsList p1, PostingsList p2){
-        PostingsList answer = new PostingsList();
-        int i = 0, j = 0;
-        while (i < p1.size() && j < p2.size()){
-            if(p1.get(i).getDocID() == p2.get(j).getDocID()){
-                answer.addLast(p1.get(i));
-                i++;
-                j++;
-            }
-            else if (p1.get(i).getDocID() < p2.get(j).getDocID()){
-                i++;
-            }
-            else{
-                j++;
-            }
-        }
-        return answer;
-    }
-
-    private PostingsList phraseIntersect(PostingsList p1, PostingsList p2){
-        PostingsList answer = new PostingsList();
-        int i = 0, j = 0;
-        while (i < p1.size() && j < p2.size()){
-            if(p1.get(i).getDocID() == p2.get(j).getDocID()){
-                Iterator<Integer> iterator = p1.get(i).getIterator();
-                while (iterator.hasNext()){
-                    if (p2.get(j).hasOffset(iterator.next() + 1)){
-                        answer.addLast(p2.get(j));
-						break;
-                    }
-                }
-                i++;
-                j++;
-            }
-            else if (p1.get(i).getDocID() < p2.get(j).getDocID()){
-                i++;
-            }
-            else{
-                j++;
-            }
-        }
-        return answer;
-    }
     /**
      *  No need for cleanup in a HashedIndex.
      */

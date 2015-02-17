@@ -6,14 +6,22 @@
  *   Second version: Johan Boye, 2012
  */
 
+import sun.util.PreHashedMap;
+
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 /**
  *   A list of postings for a given word.
  */
 public class PostingsList implements Serializable, Comparable<PostingsList> {
-    
+
+	private int cF;
+
+	private double iDF;
+
     /** The postings list as a linked list. */
     private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
 
@@ -32,6 +40,10 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return list;
 	}
 
+	public void sortList(){
+		Collections.sort(list);
+	}
+
 	public PostingsEntry getFirst(){
         return get(0);
     }
@@ -46,6 +58,36 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 
 	public void appendPostingsList(PostingsList postingsList){
 		getList().addAll(postingsList.getList());
+	}
+
+	public int getDF(){
+		return list.size();
+	}
+
+	public int getcF() {
+		return cF;
+	}
+
+	public void computeIDF(int N){
+		iDF = Math.log(N / getDF());
+	}
+
+	public void computeCF() {
+		for (PostingsEntry entry : list){
+			cF += entry.getCount();
+		}
+	}
+
+	public void normalizeScores(HashMap<String, Integer> docLengths){
+		for (PostingsEntry entry : list){
+			entry.normalizeScore(docLengths.get(entry.getDocID() + ""));
+		}
+	}
+
+	public void computeScores(){
+		for (PostingsEntry entry : list){
+			entry.computeScore(iDF);
+		}
 	}
 
 	@Override public int compareTo(PostingsList other) {

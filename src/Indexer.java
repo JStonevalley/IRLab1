@@ -78,8 +78,8 @@ public class Indexer implements Observer {
 				String[] fs = f.list();
 				// an IO error could occur
 				if ( fs != null ) {
-					index = new FileIndex(fs.length, this);
-					//index = new HashedIndex();
+					//index = new FileIndex(fs.length, this);
+					index = new HashedIndex();
 					String progress = "\n    Indexing, please wait... ";
 					if (index.hasSavedIndex()){
 						progress = "\n    Reading dictionary from file... ";
@@ -91,6 +91,7 @@ public class Indexer implements Observer {
 							resultWindow.setText(indexingProgress);
 						}
 					}
+					index.computeScore();
 				}
 			} else {
 				//System.err.println( "Indexing " + f.getPath() );
