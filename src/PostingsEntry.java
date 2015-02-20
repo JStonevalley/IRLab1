@@ -55,6 +55,10 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 		score = getCount() * iDF;
 	}
 
+	public void setScore(double score){
+		this.score = score;
+	}
+
 	/**
      *  PostingsEntries are compared by their score (only relevant 
      *  in ranked retrieval).

@@ -55,4 +55,36 @@ public class Search {
 		}
 		return answer;
 	}
+
+	public PostingsList scoreUnion(PostingsList p1, PostingsList p2){
+		PostingsList answer = new PostingsList();
+		int i = 0, j = 0;
+		while (i < p1.size() && j < p2.size()){
+			PostingsEntry postingsEntry;
+			if(p1.get(i).getDocID() == p2.get(j).getDocID()){
+				postingsEntry = new PostingsEntry(p1.get(i).getDocID(), 0);
+				postingsEntry.setScore(p1.get(i).getScore() + p2.get(j).getScore());
+				answer.addLast(postingsEntry);
+				i++;
+				j++;
+			}
+			else if (p1.get(i).getDocID() < p2.get(j).getDocID()){
+				answer.addLast(p1.get(i));
+				i++;
+			}
+			else{
+				answer.addLast(p2.get(j));
+				j++;
+			}
+		}
+		while (i < p1.size()) {
+			answer.addLast(p1.get(i));
+			i++;
+		}
+		while (j < p2.size()) {
+			answer.addLast(p2.get(j));
+			j++;
+		}
+		return answer;
+	}
 }

@@ -64,6 +64,10 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return list.size();
 	}
 
+	public double getiDF() {
+		return iDF;
+	}
+
 	public int getcF() {
 		return cF;
 	}

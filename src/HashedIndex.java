@@ -103,6 +103,24 @@ public class HashedIndex implements Index {
             }
             return intermediatePosting;
         }
+		else if (query.getTermsSize() > 1 && queryType == Index.RANKED_QUERY){
+			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(query.getTermsSize());
+			for (int i = 0; i < query.getTermsSize(); i++) {
+				PostingsList postingsList = getPostings(query.getTerm(i));
+				double termScore = Math.log(docLengths.size() / postingsList.getDF()) / query.getTermsSize();
+				//double termScore = (docLengths.size() / postingsList.getDF()) / query.getTermsSize();
+				postings.add(postingsList);
+				for (int j = 0; j < postingsList.size(); j++) {
+					postingsList.get(j).setScore(((postingsList.get(j).getCount() * postingsList.getiDF())/docLengths.get(postingsList.get(j).getDocID() + "")) * termScore);
+				}
+			}
+			PostingsList intermediatePosting = postings.get(0);
+			for (int i = 1; i < postings.size(); i++) {
+				intermediatePosting = search.scoreUnion(intermediatePosting, postings.get(i));
+			}
+			intermediatePosting.sortList();
+			return intermediatePosting;
+		}
         return null;
     }
 
