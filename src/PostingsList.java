@@ -72,6 +72,25 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 		return cF;
 	}
 
+	public void addPageRankToScore(HashMap<String, Double> pageRank, HashMap<String, String> docIDs){
+		for (PostingsEntry entry : list){
+			String fileName = docIDs.get(entry.getDocID() + "");
+			String[] tokens = fileName.split("\\\\");
+			fileName = tokens[tokens.length-1];
+			fileName = fileName.substring(0, fileName.length() -2 );
+			entry.setScore(entry.getScore() * pageRank.get(fileName));
+		}
+	}
+	public void useOnlyPageRank(HashMap<String, Double> pageRank, HashMap<String, String> docIDs){
+		for (PostingsEntry entry : list){
+			String fileName = docIDs.get(entry.getDocID() + "");
+			String[] tokens = fileName.split("\\\\");
+			fileName = tokens[tokens.length-1];
+			fileName = fileName.substring(0, fileName.length() -2 );
+			entry.setScore(pageRank.get(fileName));
+		}
+	}
+
 	public void computeIDF(int N){
 		iDF = Math.log(N / getDF());
 	}

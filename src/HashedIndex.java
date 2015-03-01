@@ -7,6 +7,10 @@
  *   Additions: Hedvig Kjellström, 2012-14
  */
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.*;
 
 /**
@@ -16,10 +20,21 @@ public class HashedIndex implements Index {
 
     /** The index as a hashtable. */
     private HashMap<String,PostingsList> index;
+//	private ArrayList<PageRankDocument> pageRankDocuments;
+	private HashMap<String, Double> pageRank;
 
     public HashedIndex() {
         this.index = new HashMap<String,PostingsList>(160000);
-    }
+
+		try {
+			ObjectInputStream objectInputStream = new ObjectInputStream(new FileInputStream(new File("C:\\Users\\Jonas\\IdeaProjects\\PageRank\\data\\pageRank.txt")));
+			this.pageRank = (HashMap<String, Double>)objectInputStream.readObject();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 
     /**
      *  Inserts this token in the index.
@@ -118,8 +133,20 @@ public class HashedIndex implements Index {
 			for (int i = 1; i < postings.size(); i++) {
 				intermediatePosting = search.scoreUnion(intermediatePosting, postings.get(i));
 			}
-			intermediatePosting.sortList();
-			return intermediatePosting;
+			if (rankingType == Index.TF_IDF) {
+				intermediatePosting.sortList();
+				return intermediatePosting;
+			}
+			else if (rankingType == Index.COMBINATION){
+				intermediatePosting.addPageRankToScore(pageRank, docIDs);
+				intermediatePosting.sortList();
+				return intermediatePosting;
+			}
+			else{
+				intermediatePosting.useOnlyPageRank(pageRank, docIDs);
+				intermediatePosting.sortList();
+				return intermediatePosting;
+			}
 		}
         return null;
     }
