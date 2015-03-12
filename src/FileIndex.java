@@ -128,6 +128,10 @@ public class FileIndex extends Observable implements Index {
 
 	public void computeScore(){}
 
+	@Override public HashMap<String, PostingsList> getIndexMap() {
+		return null;
+	}
+
 	@Override public Iterator<String> getDictionary() {
 		return dictionary.iterator();
 	}

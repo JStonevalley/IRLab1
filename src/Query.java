@@ -5,14 +5,13 @@
  *   First version:  Hedvig Kjellström, 2012
  */
 
-import java.util.LinkedList;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class Query {
     
-    private LinkedList<String> terms = new LinkedList<String>();
-    private LinkedList<Double> weights = new LinkedList<Double>();
-
+    private ArrayList<String> terms = new ArrayList<String>();
+	private HashMap<String, Double> weights = new HashMap<String, Double>();
+	private final double WEIGHT_THREASHOLD = 0d;
     /**
      *  Creates a new empty Query 
      */
@@ -31,9 +30,11 @@ public class Query {
         return terms.get(i);
     }
 
-    public Double getWeight(int i){
-        return  weights.get(i);
+    public Double getWeight(String key){
+        return  weights.get(key);
     }
+
+	public void setWeight(String key, double value){ weights.put(key, value);}
 
     /**
      *  Creates a new Query from a string of words
@@ -41,8 +42,9 @@ public class Query {
     public Query( String queryString  ) {
 	StringTokenizer tok = new StringTokenizer( queryString );
 	while ( tok.hasMoreTokens() ) {
-	    terms.add( tok.nextToken() );
-	    weights.add( new Double(1) );
+		String term = tok.nextToken();
+		terms.add(term);
+		weights.put(term, 0d);
 	}    
     }
     
@@ -58,8 +60,8 @@ public class Query {
      */
     public Query copy() {
 	Query queryCopy = new Query();
-	queryCopy.terms = (LinkedList<String>) terms.clone();
-	queryCopy.weights = (LinkedList<Double>) weights.clone();
+	queryCopy.terms = (ArrayList<String>) terms.clone();
+	queryCopy.weights = (HashMap<String, Double>) weights.clone();
 	return queryCopy;
     }
     
@@ -67,12 +69,40 @@ public class Query {
      *  Expands the Query using Relevance Feedback
      */
     public void relevanceFeedback( PostingsList results, boolean[] docIsRelevant, Indexer indexer ) {
-	// results contain the ranked list from the current search
-	// docIsRelevant contains the users feedback on which of the 10 first hits are relevant
-	
-	//
-	//  YOUR CODE HERE
-	//
+		HashMap<String,PostingsList> index = indexer.index.getIndexMap();
+		ArrayList<Integer> relevantDocs = new ArrayList<Integer>(docIsRelevant.length);
+		for (int i = 0; i < docIsRelevant.length; i++) {
+			if(docIsRelevant[i]){
+				relevantDocs.add(results.get(i).getDocID());
+			}
+		}
+		Iterator<String> dictionary = index.keySet().iterator();
+		while (dictionary.hasNext()){
+			String term = dictionary.next();
+			double weight = 0d;
+			if (weights.containsKey(term)){
+				weight = weights.get(term);
+			}
+			PostingsList postingsList = index.get(term);
+			for (PostingsEntry entry : postingsList.getList()){
+				if (relevantDocs.contains(entry.getDocID())){
+					weight += (entry.getTf() * postingsList.getiDF() / indexer.index.docLengths.get(entry.getDocID() + ""));
+				}
+			}
+			if (weight > WEIGHT_THREASHOLD){
+				if (!weights.containsKey(term)) {
+					terms.add(term);
+				}
+				weights.put(term, weight);
+			}
+		}
+		Iterator<String> queryTerms = weights.keySet().iterator();
+		int numTerms = weights.size();
+		String term;
+		while(queryTerms.hasNext()){
+			term = queryTerms.next();
+			weights.put(term, weights.get(term)/numTerms);
+		}
     }
 }
 

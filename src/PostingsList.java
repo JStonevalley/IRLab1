@@ -6,8 +6,6 @@
  *   Second version: Johan Boye, 2012
  */
 
-import sun.util.PreHashedMap;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +23,14 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
     /** The postings list as a linked list. */
     private ArrayList<PostingsEntry> list = new ArrayList<PostingsEntry>();
 
+	public PostingsList(){}
 
+	public PostingsList(PostingsList postingsList){
+		this.iDF = postingsList.getiDF();
+		for (int i = 0; i < postingsList.size(); i++) {
+			list.add(new PostingsEntry(postingsList.get(i)));
+		}
+	}
     /**  Number of postings in this list  */
     public int size() {
 	return list.size();
@@ -77,7 +82,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 			String fileName = docIDs.get(entry.getDocID() + "");
 			String[] tokens = fileName.split("\\\\");
 			fileName = tokens[tokens.length-1];
-			fileName = fileName.substring(0, fileName.length() -2 );
+			fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 			entry.setScore(entry.getScore() * pageRank.get(fileName));
 		}
 	}
@@ -86,7 +91,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 			String fileName = docIDs.get(entry.getDocID() + "");
 			String[] tokens = fileName.split("\\\\");
 			fileName = tokens[tokens.length-1];
-			fileName = fileName.substring(0, fileName.length() -2 );
+			fileName = fileName.substring(0, fileName.lastIndexOf('.'));
 			entry.setScore(pageRank.get(fileName));
 		}
 	}
@@ -97,7 +102,7 @@ public class PostingsList implements Serializable, Comparable<PostingsList> {
 
 	public void computeCF() {
 		for (PostingsEntry entry : list){
-			cF += entry.getCount();
+			cF += entry.getTf();
 		}
 	}
 

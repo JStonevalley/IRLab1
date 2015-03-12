@@ -23,6 +23,13 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         this.offsets.add(offset);
     }
 
+	public PostingsEntry(PostingsEntry postingsEntry){
+		this.docID = postingsEntry.getDocID();
+		this.offsets = new HashSet<Integer>();
+		this.offsets.addAll(postingsEntry.getOffsets());
+		this.score = postingsEntry.getScore();
+	}
+
     public int getDocID() {
         return docID;
     }
@@ -39,11 +46,15 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
         return offsets.contains(offset);
     }
 
-    public Iterator<Integer> getIterator(){
+	public HashSet<Integer> getOffsets() {
+		return offsets;
+	}
+
+	public Iterator<Integer> getIterator(){
         return offsets.iterator();
     }
 
-	public int getCount() {
+	public int getTf() {
 		return offsets.size();
 	}
 
@@ -52,7 +63,7 @@ public class PostingsEntry implements Comparable<PostingsEntry>, Serializable {
 	}
 
 	public void computeScore(double iDF){
-		score = getCount() * iDF;
+		score = getTf() * iDF;
 	}
 
 	public void setScore(double score){

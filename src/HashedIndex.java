@@ -20,7 +20,6 @@ public class HashedIndex implements Index {
 
     /** The index as a hashtable. */
     private HashMap<String,PostingsList> index;
-//	private ArrayList<PageRankDocument> pageRankDocuments;
 	private HashMap<String, Double> pageRank;
 
     public HashedIndex() {
@@ -62,14 +61,15 @@ public class HashedIndex implements Index {
 		PostingsList term;
 		while(dictionary.hasNext()){
 			term = index.get(dictionary.next());
-			//term.computeCF();
 			term.computeIDF(docLengths.size());
 		}
-
 	}
 
+	@Override public HashMap<String, PostingsList> getIndexMap() {
+		return index;
+	}
 
-    /**
+	/**
      *  Returns all the words in the index.
      */
     public Iterator<String> getDictionary() {
@@ -91,45 +91,37 @@ public class HashedIndex implements Index {
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
 		Search search = new Search();
-        if (query.getTermsSize() == 1){
-			PostingsList list = getPostings(query.getTerm(0));
-			list.computeScores();
-			//list.computeNorm();
-			list.normalizeScores(docLengths);
-			list.sortList();
-            return list;
-        }
-        else if (query.getTermsSize() > 1 && queryType == Index.INTERSECTION_QUERY){
+        if (queryType == Index.INTERSECTION_QUERY){
 			ArrayList<PostingsList> postingLists = collectPostings(query);
 			Collections.sort(postingLists);
-            PostingsList intermediatePosting = postingLists.remove(postingLists.size() - 1);
-            while (!postingLists.isEmpty()) {
-                PostingsList shortestPosting = postingLists.remove(postingLists.size() - 1);
-                intermediatePosting = search.intersect(intermediatePosting, shortestPosting);
-            }
-            return intermediatePosting;
+			PostingsList intermediatePosting = new PostingsList(postingLists.get(0));
+			for (int i = 1; i < postingLists.size(); i++) {
+				intermediatePosting = search.intersect(intermediatePosting, postingLists.get(i));
+			}
+			return intermediatePosting;
         }
-        else if (query.getTermsSize() > 1 && queryType == Index.PHRASE_QUERY){
+        else if (queryType == Index.PHRASE_QUERY){
 			ArrayList<PostingsList> postingLists = collectPostings(query);
-            PostingsList intermediatePosting;
-            intermediatePosting = postingLists.get(0);
+            PostingsList intermediatePosting = new PostingsList(postingLists.get(0));
             for (int i = 1; i < postingLists.size(); i++) {
                 intermediatePosting = search.phraseIntersect(intermediatePosting, postingLists.get(i));
             }
             return intermediatePosting;
         }
-		else if (query.getTermsSize() > 1 && queryType == Index.RANKED_QUERY){
+		else if (queryType == Index.RANKED_QUERY){
 			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(query.getTermsSize());
 			for (int i = 0; i < query.getTermsSize(); i++) {
 				PostingsList postingsList = getPostings(query.getTerm(i));
-				double termScore = Math.log(docLengths.size() / postingsList.getDF()) / query.getTermsSize();
-				//double termScore = (docLengths.size() / postingsList.getDF()) / query.getTermsSize();
+				if (query.getWeight(query.getTerm(i)) == 0d) {
+					double termScore = Math.log(docLengths.size() / postingsList.getDF());
+					query.setWeight(query.getTerm(i), termScore);
+				}
 				postings.add(postingsList);
-				for (int j = 0; j < postingsList.size(); j++) {
-					postingsList.get(j).setScore(((postingsList.get(j).getCount() * postingsList.getiDF())/docLengths.get(postingsList.get(j).getDocID() + "")) * termScore);
+				for (PostingsEntry entry : postingsList.getList()) {
+					entry.setScore(((entry.getTf() * postingsList.getiDF()) / docLengths.get(entry.getDocID() + "")) * query.getWeight(query.getTerm(i)));
 				}
 			}
-			PostingsList intermediatePosting = postings.get(0);
+			PostingsList intermediatePosting = new PostingsList(postings.get(0));
 			for (int i = 1; i < postings.size(); i++) {
 				intermediatePosting = search.scoreUnion(intermediatePosting, postings.get(i));
 			}
