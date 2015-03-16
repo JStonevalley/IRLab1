@@ -8,7 +8,8 @@
 import java.util.*;
 
 public class Query {
-    
+
+	private final double beta = 1d;
     private ArrayList<String> terms = new ArrayList<String>();
 	private HashMap<String, Double> weights = new HashMap<String, Double>();
 	private final double WEIGHT_THREASHOLD = 0d;
@@ -86,7 +87,7 @@ public class Query {
 			PostingsList postingsList = index.get(term);
 			for (PostingsEntry entry : postingsList.getList()){
 				if (relevantDocs.contains(entry.getDocID())){
-					weight += (entry.getTf() * postingsList.getiDF() / indexer.index.docLengths.get(entry.getDocID() + ""));
+					weight += beta * ((entry.getTf() * postingsList.getiDF() / indexer.index.docLengths.get(entry.getDocID() + "")));
 				}
 			}
 			if (weight > WEIGHT_THREASHOLD){

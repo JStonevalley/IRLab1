@@ -21,6 +21,7 @@ public class HashedIndex implements Index {
     /** The index as a hashtable. */
     private HashMap<String,PostingsList> index;
 	private HashMap<String, Double> pageRank;
+	private final int requiredNumberOfOccurances = 2;
 
     public HashedIndex() {
         this.index = new HashMap<String,PostingsList>(160000);
@@ -90,6 +91,7 @@ public class HashedIndex implements Index {
      *  Searches the index for postings matching the query.
      */
     public PostingsList search( Query query, int queryType, int rankingType, int structureType ) {
+		long startTime = System.nanoTime();
 		Search search = new Search();
         if (queryType == Index.INTERSECTION_QUERY){
 			ArrayList<PostingsList> postingLists = collectPostings(query);
@@ -111,14 +113,21 @@ public class HashedIndex implements Index {
 		else if (queryType == Index.RANKED_QUERY){
 			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(query.getTermsSize());
 			for (int i = 0; i < query.getTermsSize(); i++) {
-				PostingsList postingsList = getPostings(query.getTerm(i));
+				PostingsList postingsList = new PostingsList(getPostings(query.getTerm(i)));
 				if (query.getWeight(query.getTerm(i)) == 0d) {
 					double termScore = Math.log(docLengths.size() / postingsList.getDF());
 					query.setWeight(query.getTerm(i), termScore);
 				}
 				postings.add(postingsList);
-				for (PostingsEntry entry : postingsList.getList()) {
-					entry.setScore(((entry.getTf() * postingsList.getiDF()) / docLengths.get(entry.getDocID() + "")) * query.getWeight(query.getTerm(i)));
+				for (int j = 0; j < postingsList.size(); j++) {
+					PostingsEntry entry = postingsList.get(j);
+					if (entry.getTf() > requiredNumberOfOccurances) {
+						entry.setScore(((entry.getTf() * postingsList.getiDF()) / docLengths.get(entry.getDocID() + ""))
+								* query.getWeight(query.getTerm(i)));
+					} else {
+						postingsList.getList().remove(j);
+						j--;
+					}
 				}
 			}
 			PostingsList intermediatePosting = new PostingsList(postings.get(0));
@@ -127,6 +136,7 @@ public class HashedIndex implements Index {
 			}
 			if (rankingType == Index.TF_IDF) {
 				intermediatePosting.sortList();
+				System.out.println((System.nanoTime() - startTime)/1000 + " ms");
 				return intermediatePosting;
 			}
 			else if (rankingType == Index.COMBINATION){
