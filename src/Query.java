@@ -32,7 +32,7 @@ public class Query {
     }
 
     public Double getWeight(String key){
-        return  weights.get(key);
+		return  weights.get(key);
     }
 
 	public void setWeight(String key, double value){ weights.put(key, value);}

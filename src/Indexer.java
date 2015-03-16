@@ -79,7 +79,8 @@ public class Indexer implements Observer {
 				// an IO error could occur
 				if ( fs != null ) {
 					//index = new FileIndex(fs.length, this);
-					index = new HashedIndex();
+					//index = new HashedIndex();
+					index = new BiGramIndex();
 					String progress = "\n    Indexing, please wait... ";
 					if (index.hasSavedIndex()){
 						progress = "\n    Reading dictionary from file... ";
