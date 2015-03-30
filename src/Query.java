@@ -70,7 +70,7 @@ public class Query {
      *  Expands the Query using Relevance Feedback
      */
     public void relevanceFeedback( PostingsList results, boolean[] docIsRelevant, Indexer indexer ) {
-		HashMap<String,PostingsList> index = indexer.index.getIndexMap();
+		HashMap<String,PostingsList> index = indexer.getIndex().getIndexMap();
 		ArrayList<Integer> relevantDocs = new ArrayList<Integer>(docIsRelevant.length);
 		for (int i = 0; i < docIsRelevant.length; i++) {
 			if(docIsRelevant[i]){
@@ -85,9 +85,12 @@ public class Query {
 				weight = weights.get(term);
 			}
 			PostingsList postingsList = index.get(term);
+//			if (postingsList.getiDF() < 1d){
+//				continue;
+//			}
 			for (PostingsEntry entry : postingsList.getList()){
 				if (relevantDocs.contains(entry.getDocID())){
-					weight += beta * ((entry.getTf() * postingsList.getiDF() / indexer.index.docLengths.get(entry.getDocID() + "")));
+					weight += beta * ((entry.getTf() * postingsList.getiDF() / indexer.getIndex().docLengths.get(entry.getDocID() + "")));
 				}
 			}
 			if (weight > WEIGHT_THREASHOLD){
@@ -98,6 +101,7 @@ public class Query {
 			}
 		}
 		Iterator<String> queryTerms = weights.keySet().iterator();
+		System.out.println(weights.size());
 		int numTerms = weights.size();
 		String term;
 		while(queryTerms.hasNext()){

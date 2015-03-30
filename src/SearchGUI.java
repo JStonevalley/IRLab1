@@ -7,18 +7,10 @@
  */
 
 import java.io.File;
-import java.io.IOException;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
-import java.util.StringTokenizer;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
-
 
 /**
  *   A graphical interface to the information retrieval system.
@@ -173,14 +165,14 @@ public class SearchGUI extends JFrame {
 				// we don't want to search at the same time we're indexing new files
 				// (this might corrupt the index).
 				synchronized ( indexLock ) {
-					results = indexer.index.search( query, queryType, rankingType, structureType );
+					results = indexer.getIndex().search( query, queryType, rankingType, structureType );
 				}
 				StringBuffer buf = new StringBuffer();
 				if ( results != null ) {
 					buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
 					for ( int i=0; i<results.size(); i++ ) {
 						buf.append( " " + i + ". " );
-						String filename = indexer.index.docIDs.get( "" + results.get(i).getDocID() );
+						String filename = indexer.getIndex().docIDs.get( "" + results.get(i).getDocID() );
 						if ( filename == null ) {
 							buf.append( "" + results.get(i).getDocID() );
 						}
@@ -222,13 +214,13 @@ public class SearchGUI extends JFrame {
 					// synchronized since we don't want to search at the same time we're indexing new files
 					// (this might corrupt the index).
 					synchronized ( indexLock ) {
-						results = indexer.index.search( query, queryType, rankingType, structureType );
+						results = indexer.getIndex().search( query, queryType, rankingType, structureType );
 					}
 					buf.append( "\nSearch after relevance feedback:\n" );
 					buf.append( "\nFound " + results.size() + " matching document(s)\n\n" );
 					for ( int i=0; i<results.size(); i++ ) {
 						buf.append( " " + i + ". " );
-						String filename = indexer.index.docIDs.get( "" + results.get(i).getDocID() );
+						String filename = indexer.getIndex().docIDs.get( "" + results.get(i).getDocID() );
 						if ( filename == null ) {
 							buf.append( "" + results.get(i).getDocID() );
 						}
@@ -250,7 +242,7 @@ public class SearchGUI extends JFrame {
 		Action saveAndQuit = new AbstractAction() {
 			public void actionPerformed( ActionEvent e ) {
 				resultWindow.setText( "\n  Saving index..." );
-				indexer.index.cleanup();
+				indexer.getIndex().cleanup();
 				System.exit( 0 );
 			}
 		};
@@ -309,14 +301,20 @@ public class SearchGUI extends JFrame {
 
 		Action setUnigramStructure = new AbstractAction() {
 			public void actionPerformed( ActionEvent e ) {
-				structureType = Index.UNIGRAM;
+				if (structureType != Index.UNIGRAM) {
+					structureType = Index.UNIGRAM;
+					index();
+				}
 			}
 		};
 		unigramItem.addActionListener( setUnigramStructure );
 
 		Action setBigramStructure = new AbstractAction() {
 			public void actionPerformed( ActionEvent e ) {
-				structureType = Index.BIGRAM;
+				if (structureType != Index.BIGRAM) {
+					structureType = Index.BIGRAM;
+					index();
+				}
 			}
 		};
 		bigramItem.addActionListener( setBigramStructure );
@@ -344,7 +342,7 @@ public class SearchGUI extends JFrame {
 			resultWindow.setText( "\n  Indexing, please wait..." );
 			for ( int i=0; i<dirNames.size(); i++ ) {
 				File dokDir = new File( homeDir + dirNames.get( i ));
-				indexer.processFiles(dokDir);
+				indexer.processFiles(dokDir, structureType);
 			}
 			resultWindow.setText( "Indexing Complete..." );
 		}

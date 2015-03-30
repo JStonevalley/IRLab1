@@ -21,7 +21,7 @@ public class HashedIndex implements Index {
     /** The index as a hashtable. */
     private HashMap<String,PostingsList> index;
 	private HashMap<String, Double> pageRank;
-	private final int requiredNumberOfOccurances = 2;
+	private final int requiredNumberOfOccurances = 0;
 
     public HashedIndex() {
         this.index = new HashMap<String,PostingsList>(160000);
@@ -114,15 +114,25 @@ public class HashedIndex implements Index {
 			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(query.getTermsSize());
 			for (int i = 0; i < query.getTermsSize(); i++) {
 				PostingsList postingsList = new PostingsList(getPostings(query.getTerm(i)));
+				//Speedup
+//				if (postingsList.getiDF() < 1d){
+//					continue;
+//				}
 				if (query.getWeight(query.getTerm(i)) == 0d) {
-					double termScore = Math.log(docLengths.size() / postingsList.getDF());
+					double termScore = Math.log((double)docLengths.size() / postingsList.getDF());
 					query.setWeight(query.getTerm(i), termScore);
+					//Debug
+					System.out.print(query.getTerm(i) + ": " + termScore);
+					System.out.println("#docs: " + docLengths.size() + " DF: " + postingsList.getDF() + " ");
 				}
 				postings.add(postingsList);
 				for (int j = 0; j < postingsList.size(); j++) {
 					PostingsEntry entry = postingsList.get(j);
+					//Speedup Index Elimination
 					if (entry.getTf() > requiredNumberOfOccurances) {
-						entry.setScore(((entry.getTf() * postingsList.getiDF()) / docLengths.get(entry.getDocID() + ""))
+						// Calculate and normalize by square root
+						entry.setScore(((entry.getTf() * postingsList.getiDF()) / Math
+								.sqrt(docLengths.get(entry.getDocID() + "")))
 								* query.getWeight(query.getTerm(i)));
 					} else {
 						postingsList.getList().remove(j);

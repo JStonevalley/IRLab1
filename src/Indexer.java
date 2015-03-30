@@ -31,7 +31,7 @@ import javax.swing.*;
 public class Indexer implements Observer {
 
 	/** The index to be built up by this indexer. */
-	public Index index;
+	private Index index;
 	private JTextArea resultWindow;
 	private String indexingProgress;
 
@@ -65,13 +65,15 @@ public class Indexer implements Observer {
 
 
     /* ----------------------------------------------- */
-
+	public Index getIndex(){
+		return index;
+	}
 
 	/**
 	 *  Tokenizes and indexes the file @code{f}. If @code{f} is a directory,
 	 *  all its files and subdirectories are recursively processed.
 	 */
-	public void processFiles( File f) {
+	public void processFiles( File f, int structureType) {
 		// do not try to index fs that cannot be read
 		if ( f.canRead() ) {
 			if ( f.isDirectory() ) {
@@ -79,14 +81,16 @@ public class Indexer implements Observer {
 				// an IO error could occur
 				if ( fs != null ) {
 					//index = new FileIndex(fs.length, this);
-					//index = new HashedIndex();
-					index = new BiGramIndex();
+					if (structureType == Index.UNIGRAM)
+						index = new HashedIndex();
+					else
+						index = new BiGramIndex();
 					String progress = "\n    Indexing, please wait... ";
 					if (index.hasSavedIndex()){
 						progress = "\n    Reading dictionary from file... ";
 					}
 					for ( int i=0; i<fs.length; i++ ) {
-						processFiles( new File( f, fs[i] ));
+						processFiles( new File( f, fs[i] ), structureType);
 						if (i % (fs.length/100) == 0) {
 							indexingProgress = progress + (i * 100) / fs.length + "%";
 							resultWindow.setText(indexingProgress);
