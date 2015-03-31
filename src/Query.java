@@ -27,6 +27,15 @@ public class Query {
         return weights.size();
     }
 
+	public void addTerm(String term){
+		terms.add(term);
+		weights.put(term, 0d);
+	}
+
+	public String removeTerm(int i){
+		return terms.remove(i);
+	}
+
     public String getTerm(int i){
         return terms.get(i);
     }

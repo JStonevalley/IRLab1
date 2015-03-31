@@ -1,11 +1,7 @@
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 
-/**
- * Created by Jonas on 16/03/2015.
- */
 public class BiGramIndex implements Index {
 
 	private HashMap<String,PostingsList> index = new HashMap<String, PostingsList>(20000);
@@ -59,22 +55,28 @@ public class BiGramIndex implements Index {
 		long startTime = System.nanoTime();
 		Search search = new Search();
 		if (queryType == Index.RANKED_QUERY){
-			ArrayList<String> biGramQueryTerms = new ArrayList<String>(query.getTermsSize());
-			for (int i = 1; i < query.getTermsSize(); i++) {
-				biGramQueryTerms.add(query.getTerm(i-1) + " " + query.getTerm(i));
+			while(query.getTerm(1) != null && (query.getTerm(1).split(" ").length < 2)){
+				query.addTerm(query.getTerm(0) + " " + query.getTerm(1));
+				query.removeTerm(0);
 			}
-			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(biGramQueryTerms.size());
-			for (int i = 0; i < biGramQueryTerms.size(); i++) {
-				PostingsList postingsList = new PostingsList(getPostings(biGramQueryTerms.get(i)));
-				if (query.getWeight(biGramQueryTerms.get(i)) == null || query.getWeight(biGramQueryTerms.get(i)) == 0d) {
+			query.removeTerm(0);
+//			ArrayList<String> biGramQueryTerms = new ArrayList<String>(query.getTermsSize());
+//			for (int i = 1; i < query.getTermsSize(); i++) {
+//				biGramQueryTerms.add(query.getTerm(i-1) + " " + query.getTerm(i));
+//			}
+
+			ArrayList<PostingsList> postings = new ArrayList<PostingsList>(query.getTermsSize());
+			for (int i = 0; i < query.getTermsSize(); i++) {
+				PostingsList postingsList = new PostingsList(getPostings(query.getTerm(i)));
+				if (query.getWeight(query.getTerm(i)) == null || query.getWeight(query.getTerm(i)) == 0d) {
 					double termScore = Math.log(docLengths.size() / postingsList.getDF());
-					query.setWeight(biGramQueryTerms.get(i), termScore);
+					query.setWeight(query.getTerm(i), termScore);
 				}
 				postings.add(postingsList);
 				for (int j = 0; j < postingsList.size(); j++) {
 					PostingsEntry entry = postingsList.get(j);
 						entry.setScore(((entry.getTf() * postingsList.getiDF()) / docLengths.get(entry.getDocID() + ""))
-								* query.getWeight(biGramQueryTerms.get(i)));
+								* query.getWeight(query.getTerm(i)));
 				}
 			}
 			PostingsList intermediatePosting = new PostingsList(postings.get(0));
